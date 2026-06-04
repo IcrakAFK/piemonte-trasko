@@ -3,13 +3,10 @@
 --  MySQL 5.7+ / MariaDB 10.2+
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS `piemonte_trasco`
-  DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE `piemonte_trasco`;
-
 -- ============================================================
 --  JUGADORES
 -- ============================================================
+DROP TABLE IF EXISTS `jugadores`;
 DROP TABLE IF EXISTS `jugadores`;
 CREATE TABLE `jugadores` (
   `id`         INT AUTO_INCREMENT PRIMARY KEY,
@@ -18,6 +15,7 @@ CREATE TABLE `jugadores` (
   `posicion`   VARCHAR(50)  NOT NULL,
   `pais`       VARCHAR(100) DEFAULT NULL COMMENT 'País asignado y bandera del jugador',
   `capitan`    TINYINT(1)   NOT NULL DEFAULT 0,
+  `goles`      INT          NOT NULL DEFAULT 0,
   `activo`     TINYINT(1)   NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
   UNIQUE KEY `uniq_dorsal` (`dorsal`)
@@ -89,6 +87,19 @@ CREATE TABLE `mensajes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+--  NUEVA TABLA: GOLES_PARTIDOS (Versión ultra simplificada)
+-- ============================================================
+DROP TABLE IF EXISTS `goles_partidos`;
+CREATE TABLE `goles_partidos` (
+  `id`         INT AUTO_INCREMENT PRIMARY KEY,
+  `partido_id` INT NOT NULL,
+  `goleador`   VARCHAR(100) NOT NULL COMMENT 'Nombre de quien hizo los goles',
+  `goles`      INT NOT NULL DEFAULT 1 COMMENT 'Cantidad de goles marcados',
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_goles_partido_simple` FOREIGN KEY (`partido_id`) REFERENCES `partidos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
 --  DATOS INICIALES (SEED)
 -- ============================================================
 INSERT INTO `jugadores` (`dorsal`, `nombre`, `posicion`, `pais`, `capitan`) VALUES
@@ -103,18 +114,21 @@ INSERT INTO `jugadores` (`dorsal`, `nombre`, `posicion`, `pais`, `capitan`) VALU
 (67, 'Brian',    'Mediocentro',       '🇪🇸 España',           0),
 (99, 'Raspa',    'Mediocentro',       '🇪🇸 España',           1), -- Capitán
 (10, 'Jowi',     'Mediapunta',        '🇺🇸 Estados Unidos',   0),
+(1312, 'Moi',     'Mediapunta',        '🇪🇸 España',          0),
 (11, 'Viñas',    'Extremo Der.',      '🇲🇦 Marruecos',        0),
 (7,  'Inho',     'Extremo Izq.',      '🇰🇵 Corea del Norte',  0),
 (9,  'Grasa',    'Delantero',         '🇪🇸 España',           0),
 (17, 'Ostos',    'Delantero',         '🇨🇴 Colombia',         0),
 (0,  'Traskis',  'Entrenador',        '🇪🇸 España',           0);
 
-INSERT INTO `partidos` (`fecha`,`hora`,`local`,`visitante`,`goles_local`,`goles_visitante`,`condicion`,`jugado`,`jornada`) VALUES
-('2025-09-14','17:00:00','CD Piemonte Trasco','Atlético Barbadás',2,1,'casa',1,1),
-('2025-09-21','18:30:00','Velle CF','CD Piemonte Trasco',0,3,'fuera',1,2),
-('2025-09-28','17:00:00','CD Piemonte Trasco','Ourense SD B',1,1,'casa',1,3),
-('2025-10-05','17:00:00','Pereiro de Aguiar','CD Piemonte Trasco',NULL,NULL,'fuera',0,4),
-('2025-10-12','17:00:00','CD Piemonte Trasco','Allariz CF',NULL,NULL,'casa',0,5);
+INSERT INTO `partidos` (`fecha`, `hora`, `local`, `visitante`, `goles_local`, `goles_visitante`, `condicion`, `jugado`, `jornada`) VALUES 
+('2026-03-25', '19:00:00', 'CD Piemonte Trasco', 'SD Informaquinas', 1, 6, 'casa', 1, NULL),
+('2026-02-23', '17:00:00', 'CD Piemonte Trasco', 'Sativa Galega FC', 4, 5, 'casa', 1, NULL),
+('2026-02-19', '18:00:00', 'CD Piemonte Trasco', 'Pitukos FC', 3, 7, 'casa', 1, NULL),
+('2026-02-09', '19:00:00', 'CD Piemonte Trasco', 'SPK Xabarís', 5, 4, 'casa', 1, NULL),
+('2025-02-03', '21:00:00', 'Aston Birra', 'CD Piemonte Trasco', 4, 3, 'fuera', 1, NULL),
+('2025-12-04', '17:00:00', 'CD Piemonte Trasco', 'Cervezas Tomglezz', 1, 4, 'casa', 1, NULL),
+('2025-11-03', '19:00:00', 'Pitukos FC', 'CD Piemonte Trasco', 6, 2, 'fuera', 1, NULL);
 
 INSERT INTO `clasificacion` (`equipo`,`pj`,`pg`,`pe`,`pp`,`gf`,`gc`,`puntos`,`es_piemonte`) VALUES
 ('Ourense SD B',       3,2,1,0,6,3,7,0),
@@ -128,3 +142,4 @@ INSERT INTO `patrocinadores` (`nombre`,`descripcion`,`orden`) VALUES
 ('Hamburguesería Queen', 'La hamburguesa oficial del vestuario', 1),
 ('Júpiter Ourense',      'Energía para los noventa minutos',    2),
 ('Cristina KDK',         'Apoyo incondicional desde la grada',  3);
+

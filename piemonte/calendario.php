@@ -13,7 +13,7 @@ $partidos = db()->query(
 )->fetchAll();
 
 // VARIABLES PARA CALCULAR LOS DATOS DE LA TEMPORADA 25/26
-$pj = 0; $pg = 0; $pp = 0; $gf = 0; $gc = 0;
+$pj = 0; $pg = 0; $pe = 0; $pp = 0; $gf = 0; $gc = 0;
 $racha_temp = []; // Guardará los resultados cronológicamente
 
 foreach ($partidos as $p) {
@@ -38,6 +38,9 @@ foreach ($partidos as $p) {
                 } elseif ($p['goles_local'] < $p['goles_visitante']) {
                     $pp++; // Derrota en casa
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'P';
+                } else {
+                    $pe++; // Empate en casa
+                    $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'E';
                 }
             } else {
                 // Si jugamos fuera
@@ -50,13 +53,16 @@ foreach ($partidos as $p) {
                 } elseif ($p['goles_visitante'] < $p['goles_local']) {
                     $pp++; // Derrota fuera
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'P';
+                } else {
+                    $pe++; // Empate fuera
+                    $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'E';
                 }
             }
         }
     }
 }
 
-// Ordenamos la racha para asegurar el orden más reciente (los primeros del array original ya vienen ordenados descendentes)
+// Cortamos exactamente los últimos 5 partidos jugados
 $ultimos_5 = array_slice(array_values($racha_temp), 0, 5);
 
 // Cálculos avanzados para las tarjetas informativas
@@ -111,12 +117,17 @@ $diff_goles = $gf - $gc;
     <div class="reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
       
       <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); text-align: center;">
-        <div style="font-size: 0.85rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.5rem;">Racha Actual</div>
+        <div style="font-size: 0.85rem; color: var(--muted); text-transform: uppercase; margin-bottom: 0.5rem;">Últimos 5 partidos</div>
         <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center; height: 32px;">
           <?php if(empty($ultimos_5)): ?>
             <span style="color:var(--muted); font-size:0.9rem;">-</span>
           <?php else: ?>
-            <?php foreach($ultimos_5 as $resultado): ?>
+            <?php foreach($ultimos_5 as $resultado): 
+              // Definimos el color según el resultado: Verde (G), Gris/Amarillo (E), Rojo (P)
+              $color = '#ff3860'; // Por defecto derrota
+              if ($resultado === 'G') $color = '#00ff9c';
+              if ($resultado === 'E') $color = '#ffdd57'; 
+            ?>
               <span style="
                 display: inline-block; 
                 width: 24px; 
@@ -125,9 +136,9 @@ $diff_goles = $gf - $gc;
                 border-radius: 50%; 
                 font-size: 0.75rem; 
                 font-weight: bold; 
-                color: #fff;
-                background: <?= $resultado === 'G' ? '#00ff9c' : '#ff3860' ?>;
-                box-shadow: 0 0 10px <?= $resultado === 'G' ? 'rgba(0, 255, 156, 0.2)' : 'rgba(255, 56, 96, 0.2)' ?>;
+                color: #000; /* Texto oscuro para que resalte bien sobre los fondos brillantes */
+                background: <?= $color ?>;
+                box-shadow: 0 0 10px <?= $color . '33' ?>;
               "><?= $resultado ?></span>
             <?php endforeach; ?>
           <?php endif; ?>
@@ -160,6 +171,7 @@ $diff_goles = $gf - $gc;
             <th>Equipo</th>
             <th class="num">PJ</th>
             <th class="num">PG</th>
+            <th class="num">PE</th>
             <th class="num">PP</th>
             <th class="num">GF</th>
             <th class="num">GC</th>
@@ -170,6 +182,7 @@ $diff_goles = $gf - $gc;
             <td>CD Piemonte Trasco</td>
             <td class="num"><?= $pj ?></td>
             <td class="num"><?= $pg ?></td>
+            <td class="num"><?= $pe ?></td>
             <td class="num"><?= $pp ?></td>
             <td class="num"><?= $gf ?></td>
             <td class="num"><?= $gc ?></td>
