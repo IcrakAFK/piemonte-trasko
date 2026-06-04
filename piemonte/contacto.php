@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <section class="block">
   <div class="container">
     <div class="section-head reveal">
-      <span class="section-tag">// INSERT INTO mensajes</span>
+      <span class="section-tag"></span>
       <h2>Contáctanos</h2>
       <p>¿Quieres unirte, patrocinarnos o simplemente saludar? Escríbenos.</p>
     </div>
@@ -46,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
       <label for="nombre">Nombre</label>
       <input type="text" id="nombre" name="nombre" required value="<?= htmlspecialchars($_POST['nombre'] ?? '') ?>">
-
+      <br>
       <label for="email">Email</label>
       <input type="email" id="email" name="email" required value="<?= htmlspecialchars($_POST['email'] ?? '') ?>">
-
+      <br>
       <label for="mensaje">Mensaje</label>
       <textarea id="mensaje" name="mensaje" required><?= htmlspecialchars($_POST['mensaje'] ?? '') ?></textarea>
-
+      <br>
       <button type="submit" class="btn btn-primary">Enviar mensaje →</button>
     </form>
 

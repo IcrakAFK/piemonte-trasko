@@ -260,69 +260,179 @@ section.block { padding: 5rem 0; }
 
 /* ============ CALENDAR ============ */
 .match {
-  display: grid; grid-template-columns: 90px 1fr auto; gap: 1.5rem;
+  display: flex;
+  gap: 1.25rem;
   align-items: center;
-  background: var(--carbon); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 1.25rem 1.5rem;
+  background: var(--carbon); 
+  border: 1px solid var(--line);
+  border-radius: var(--radius); 
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+.match-date { 
+  flex-shrink: 0; 
+  width: 75px; 
+  text-align: center; 
+  font-family: var(--font-mono); 
+}
+.match-date .day { 
+  font-family: var(--font-display); 
+  font-size: 2.2rem; 
+  color: var(--terminal); 
+  line-height: 1; 
+}
+.match-date .mo { 
+  font-size: .75rem; 
+  color: var(--muted); 
+  text-transform: uppercase; 
+  letter-spacing: 2px; 
+}
+.match-teams { 
+  font-family: var(--font-display); 
+  font-size: 1.4rem; 
+  letter-spacing: 1px; 
+  color: var(--chalk); 
+  line-height: 1.2;
+}
+.match-meta { 
+  font-family: var(--font-mono); 
+  font-size: .8rem; 
+  color: var(--muted); 
+  margin-top: .2rem; 
+}
+.match-score { 
+  flex-shrink: 0;
+  font-family: var(--font-display); 
+  font-size: 1.8rem; 
+  color: var(--gold); 
+  text-align: right;
+  margin-left: auto;
+}
+.match.pend .match-score { 
+  color: var(--cyan); 
+  font-size: 0.9rem; 
+  font-family: var(--font-mono); 
+}
+
+/* Ajustes adaptativos de tamaño para pantallas pequeñas */
+@media (max-width: 480px) {
+  .match { padding: 1rem; gap: 0.85rem; }
+  .match-date { width: 55px; }
+  .match-date .day { font-size: 1.7rem; }
+  .match-teams { font-size: 1.15rem; }
+  .match-score { font-size: 1.3rem; }
+}
+
+/* ============ INTERACTIVIDAD CALENDARIO (DESPLEGABLE GOLES) ============ */
+.match.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.match.clickable:hover {
+  border-color: var(--terminal);
+  background: rgba(255, 255, 255, 0.02);
+}
+.match-container {
   margin-bottom: 1rem;
 }
-.match-date { text-align: center; font-family: var(--font-mono); }
-.match-date .day { font-family: var(--font-display); font-size: 2.2rem; color: var(--terminal); line-height: 1; }
-.match-date .mo { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
-.match-teams { font-family: var(--font-display); font-size: 1.4rem; letter-spacing: 1px; color: var(--chalk); }
-.match-meta { font-family: var(--font-mono); font-size: .8rem; color: var(--muted); margin-top: .2rem; }
-.match-score { font-family: var(--font-display); font-size: 1.8rem; color: var(--gold); }
-.match.pend .match-score { color: var(--cyan); font-size: 1rem; font-family: var(--font-mono); }
 
-/* ============ SPONSORS STRIP ============ */
-.sponsors-strip {
-  background: var(--carbon);
-  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  padding: 2.5rem 0;
+/* Estado CERRADO */
+.match-details-dropdown {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding: 0 1.5rem;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.2s ease, opacity 0.2s ease;
+  background: linear-gradient(135deg, #0d1f17 0%, #0a1a12 100%);
+  border: 1px solid var(--terminal);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-top: -1px;
 }
-.sponsors-strip .container { display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 2rem; }
-.sponsor-item {
-  font-family: var(--font-display); font-size: 1.3rem;
-  letter-spacing: 1.5px; color: var(--muted);
-  transition: color .2s;
-}
-.sponsor-item:hover { color: var(--gold); }
 
-/* ============ CONTACT ============ */
-.form {
-  max-width: 600px; margin: 0 auto;
-  background: var(--carbon); padding: 2.5rem; border-radius: var(--radius);
-  border: 1px solid var(--line);
+/* Estado ABIERTO */
+.match-details-dropdown.open {
+  max-height: 600px;
+  opacity: 1;
+  padding: 1.2rem 1.5rem 1.4rem;
 }
-.form label { display: block; font-family: var(--font-mono); font-size: .8rem; color: var(--terminal); margin-bottom: .4rem; text-transform: uppercase; letter-spacing: 1px; }
-.form input, .form textarea {
-  width: 100%; background: var(--void); border: 1px solid var(--line);
-  color: var(--bone); padding: .8rem 1rem; border-radius: 8px;
-  font-family: var(--font-sans); font-size: 1rem; margin-bottom: 1.25rem;
-  transition: border-color .2s;
+
+@media (max-width: 480px) {
+  .match-details-dropdown {
+    padding: 0 0.75rem;
+  }
+  .match-details-dropdown.open {
+    padding: 1rem 0.75rem 1.1rem;
+  }
 }
-.form input:focus, .form textarea:focus { outline: 0; border-color: var(--terminal); }
-.form textarea { min-height: 140px; resize: vertical; }
-.alert { padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-family: var(--font-mono); font-size: .9rem; }
-.alert.ok { background: rgba(0,255,156,.1); color: var(--terminal); border: 1px solid rgba(0,255,156,.3); }
-.alert.err { background: rgba(230,57,70,.1); color: var(--rouge); border: 1px solid rgba(230,57,70,.3); }
 
-/* ============ FOOTER ============ */
-.site-footer { background: #06090C; border-top: 1px solid var(--line); padding: 4rem 0 1.5rem; margin-top: 4rem; }
-.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; margin-bottom: 3rem; }
-@media (max-width: 800px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
-.footer-title { font-family: var(--font-display); font-size: 1.5rem; letter-spacing: 1px; color: var(--chalk); margin-bottom: .5rem; }
-.footer-tag { font-family: var(--font-mono); font-style: italic; color: var(--terminal); margin-bottom: .75rem; }
-.footer-small { color: var(--muted); font-size: .85rem; }
-.site-footer h4 { font-family: var(--font-mono); text-transform: uppercase; font-size: .8rem; color: var(--terminal); letter-spacing: 1px; margin-bottom: 1rem; }
-.site-footer ul { list-style: none; }
-.site-footer ul li { margin-bottom: .5rem; }
-.site-footer ul li a, .sponsors li { color: var(--bone); font-size: .9rem; }
-.ig-link { display: inline-flex; align-items: center; gap: .5rem; color: var(--bone); margin-bottom: .5rem; }
-.ig-link:hover { color: var(--terminal); }
-.footer-bottom { padding-top: 1.5rem; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: .85rem; }
-.code-tag { font-family: var(--font-mono); color: var(--terminal); }
+.goleadores-title {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--terminal);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 255, 156, 0.2);
+}
 
-/* ============ ANIMATIONS ============ */
-.reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s, transform .7s; }
-.reveal.in { opacity: 1; transform: none; }
+.goleadores-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.goleadores-list li {
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  color: var(--chalk);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  border-left: 2px solid var(--terminal);
+}
+.balones-emoji {
+  letter-spacing: 2px;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+.jugador-name-tag {
+  color: var(--bone);
+  font-weight: 500;
+}
+
+.match.dropdown-open {
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-color: var(--terminal);
+  margin-bottom: 0;
+}
+
+/* ============ DESTACADO MÁXIMO GOLEADOR (PICHICHI) ============ */
+.tabla tr.pichichi {
+  background: var(--terminal) !important;
+  box-shadow: 0 0 25px rgba(0, 255, 156, 0.3);
+}
+
+/* Corrección de color de texto en móviles para la fila Pichichi */
+.tabla tr.pichichi td,
+.tabla tr.pichichi td.dorsal-col,
+.tabla tr.pichichi td.nombre-col,
+.tabla tr.pichichi td.pos-col,
+.tabla tr.pichichi td.goles-col {
+  color: #000000 !important;
+  font-weight: 700 !important;
+  background: transparent !important;
+}
+
+.tabla td.dorsal-col { font-family: var(--font-mono); color: var(--muted); }
+.tabla td.nombre-col { color: var(--chalk); }
+.tabla td.pos-col { font-size: 0.9rem; color: var(--muted); }
+.tabla td.goles-col { text-align: left; font-size: 1.1rem; letter-spacing: 2px; padding-left: 0.5rem; }

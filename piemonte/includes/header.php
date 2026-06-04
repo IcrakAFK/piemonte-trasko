@@ -16,7 +16,9 @@ $desc = $desc ?? 'Equipo de fútbol aficionado de la ESEI - Campus de Ourense (U
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css">
+
+<link rel="stylesheet" href="assets/css/style.css?v=1.0.1">
+
 </head>
 <body data-page="<?= htmlspecialchars($page) ?>">
 <header class="site-header">

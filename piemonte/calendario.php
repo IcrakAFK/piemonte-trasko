@@ -6,55 +6,65 @@ include 'includes/header.php';
 
 $meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
-// Traemos todos los partidos ordenados del más reciente al más antiguo
+// Traemos los partidos y concatenamos los goles de cada goleador en ese partido
 $partidos = db()->query(
-  "SELECT fecha, hora, local, visitante, goles_local, goles_visitante, condicion, jugado
-   FROM partidos ORDER BY fecha DESC, hora DESC"
+  "SELECT p.id, p.fecha, p.hora, p.local, p.visitante, p.goles_local, p.goles_visitante, p.condicion, p.jugado,
+          (SELECT GROUP_CONCAT(CONCAT(gp.goleador, ' (', gp.goles, ')') SEPARATOR ', ') 
+           FROM goles_partidos gp 
+           WHERE gp.partido_id = p.id) AS goleadores
+   FROM partidos p 
+   ORDER BY p.fecha DESC, p.hora DESC"
 )->fetchAll();
 
-// VARIABLES PARA CALCULAR LOS DATOS DE LA TEMPORADA 25/26
+// NUEVA CONSULTA: Traemos los jugadores con sus goles totales calculados en tiempo real de más a menos goles
+$goleadores_ranking = db()->query(
+  "SELECT j.nombre, j.dorsal, j.posicion, IFNULL(SUM(gp.goles), 0) AS goles_totales
+   FROM jugadores j
+   LEFT JOIN goles_partidos gp ON j.nombre = gp.goleador
+   WHERE j.activo = 1
+   GROUP BY j.id
+   ORDER BY goles_totales DESC, j.nombre ASC"
+)->fetchAll();
+
+// VARIABLES PARA CALCULAR LOS DATOS DE LA TEMPORADA
 $pj = 0; $pg = 0; $pe = 0; $pp = 0; $gf = 0; $gc = 0;
-$racha_temp = []; // Guardará los resultados cronológicamente
+$racha_temp = []; 
 
 foreach ($partidos as $p) {
-    // Solo contamos los partidos que ya se han JUGADO
-    if ($p['jugado'] == 1) {
+    if ($p['jugado'] == 1 && $p['goles_local'] !== null && $p['goles_visitante'] !== null) {
         $fecha_partido = strtotime($p['fecha']);
-        $inicio_temporada = strtotime('2025-08-01');
-        $fin_temporada = strtotime('2026-07-31');
+        $inicio_temporada = strtotime('2025-01-01');
+        $fin_temporada = strtotime('2026-12-31');
 
-        // Filtramos para que solo entren los partidos de la temporada 25/26
         if ($fecha_partido >= $inicio_temporada && $fecha_partido <= $fin_temporada) {
-            $pj++; // Suma un partido jugado
+            $pj++; 
 
             if ($p['condicion'] === 'casa') {
-                // Si jugamos en casa
                 $gf += $p['goles_local'];
                 $gc += $p['goles_visitante'];
                 
                 if ($p['goles_local'] > $p['goles_visitante']) {
-                    $pg++; // Victoria en casa
+                    $pg++;
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'G';
                 } elseif ($p['goles_local'] < $p['goles_visitante']) {
-                    $pp++; // Derrota en casa
+                    $pp++;
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'P';
                 } else {
-                    $pe++; // Empate en casa
+                    $pe++;
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'E';
                 }
             } else {
-                // Si jugamos fuera
                 $gf += $p['goles_visitante'];
                 $gc += $p['goles_local'];
                 
                 if ($p['goles_visitante'] > $p['goles_local']) {
-                    $pg++; // Victoria fuera
+                    $pg++;
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'G';
                 } elseif ($p['goles_visitante'] < $p['goles_local']) {
-                    $pp++; // Derrota fuera
+                    $pp++;
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'P';
                 } else {
-                    $pe++; // Empate fuera
+                    $pe++;
                     $racha_temp[$p['fecha'] . '_' . $p['hora']] = 'E';
                 }
             }
@@ -62,10 +72,7 @@ foreach ($partidos as $p) {
     }
 }
 
-// Cortamos exactamente los últimos 5 partidos jugados
 $ultimos_5 = array_slice(array_values($racha_temp), 0, 5);
-
-// Cálculos avanzados para las tarjetas informativas
 $promedio_gf = $pj > 0 ? round($gf / $pj, 1) : 0;
 $promedio_gc = $pj > 0 ? round($gc / $pj, 1) : 0;
 $diff_goles = $gf - $gc;
@@ -81,7 +88,7 @@ $diff_goles = $gf - $gc;
     <div class="section-head reveal">
       <span class="section-tag"></span>
       <h2>Calendario</h2>
-      <p>Próximos partidos y resultados. Las convocatorias se publican en <a href="https://instagram.com/piemonte_trasko" target="_blank" rel="noopener">@piemonte_trasko</a>.</p>
+      <p>Próximos partidos y resultados. Haz clic en un partido jugado para ver los goleadores. Las convocatorias se publican en <a href="https://instagram.com/piemonte_trasko" target="_blank" rel="noopener">@piemonte_trasko</a>.</p>
     </div>
 
     <?php foreach ($partidos as $p):
@@ -91,17 +98,48 @@ $diff_goles = $gf - $gc;
       $hora = $p['hora'] ? substr($p['hora'],0,5) : '';
       $loc  = $p['condicion'] === 'casa' ? 'Casa' : 'Fuera';
       $marc = $p['jugado'] ? ($p['goles_local'].' - '.$p['goles_visitante']) : 'Por jugar';
+      
+      $es_clickable = $p['jugado'] && !empty($p['goleadores']);
     ?>
-      <div class="match <?= $p['jugado']?'':'pend' ?> reveal">
-        <div class="match-date">
-          <div class="day"><?= $day ?></div>
-          <div class="mo"><?= $mo ?></div>
+      <div class="match-container">
+        <div class="match <?= $p['jugado']?'':'pend' ?> <?= $es_clickable ? 'clickable' : '' ?> reveal">
+          <div class="match-date">
+            <div class="day"><?= $day ?></div>
+            <div class="mo"><?= $mo ?></div>
+          </div>
+          <div style="flex-grow: 1; min-width: 0; padding-right: 0.5rem;">
+            <div class="match-teams" style="word-wrap: break-word; overflow-wrap: break-word; max-width: 100%;"><?= htmlspecialchars($p['local']) ?> <span style="color:var(--muted)">vs</span> <?= htmlspecialchars($p['visitante']) ?></div>
+            <div class="match-meta"><?= $hora ?> · <?= $loc ?> <?= $es_clickable ? '· <span style="color:var(--terminal); font-size:0.75rem;">⚡ VER GOLES</span>' : '' ?></div>
+          </div>
+          <div class="match-score"><?= htmlspecialchars($marc) ?></div>
         </div>
-        <div>
-          <div class="match-teams"><?= htmlspecialchars($p['local']) ?> <span style="color:var(--muted)">vs</span> <?= htmlspecialchars($p['visitante']) ?></div>
-          <div class="match-meta"><?= $hora ?> · <?= $loc ?></div>
-        </div>
-        <div class="match-score"><?= htmlspecialchars($marc) ?></div>
+
+        <?php if ($es_clickable): ?>
+          <div class="match-details-dropdown">
+            <div class="goleadores-title">⚡ Goles Piemonte</div>
+            <ul class="goleadores-list" style="list-style: none; padding: 0;">
+              <?php
+                $goles_partido = explode(', ', $p['goleadores']);
+                foreach ($goles_partido as $g):
+                  $g = trim($g);
+                  if ($g !== ''):
+                    $pos_parentesis = strpos($g, '(');
+                    if ($pos_parentesis !== false) {
+                      $nombre_jugador = trim(substr($g, 0, $pos_parentesis));
+                      $cantidad_goles = (int)str_replace(['(', ')'], '', substr($g, $pos_parentesis));
+                    } else {
+                      $nombre_jugador = $g;
+                      $cantidad_goles = 1;
+                    }
+              ?>
+                <li style="margin-bottom: 0.45rem; font-family: var(--font-sans); display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="color: var(--terminal); font-family: var(--font-mono); font-weight: bold;">⚽ <?= $cantidad_goles ?> <?= $cantidad_goles === 1 ? 'gol' : 'goles' ?></span> 
+                  <span style="color: var(--bone);">— <?= htmlspecialchars($nombre_jugador) ?></span>
+                </li>
+              <?php endif; endforeach; ?>
+            </ul>
+          </div>
+        <?php endif; ?>
       </div>
     <?php endforeach; ?>
   </div>
@@ -111,7 +149,7 @@ $diff_goles = $gf - $gc;
   <div class="container">
     <div class="section-head reveal">
       <span class="section-tag"></span>
-      <h2>Datos de la Temporada (25/26)</h2>
+      <h2>Datos de la Temporada</h2>
     </div>
 
     <div class="reveal" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
@@ -123,8 +161,7 @@ $diff_goles = $gf - $gc;
             <span style="color:var(--muted); font-size:0.9rem;">-</span>
           <?php else: ?>
             <?php foreach($ultimos_5 as $resultado): 
-              // Definimos el color según el resultado: Verde (G), Gris/Amarillo (E), Rojo (P)
-              $color = '#ff3860'; // Por defecto derrota
+              $color = '#ff3860'; 
               if ($resultado === 'G') $color = '#00ff9c';
               if ($resultado === 'E') $color = '#ffdd57'; 
             ?>
@@ -136,7 +173,7 @@ $diff_goles = $gf - $gc;
                 border-radius: 50%; 
                 font-size: 0.75rem; 
                 font-weight: bold; 
-                color: #000; /* Texto oscuro para que resalte bien sobre los fondos brillantes */
+                color: #000;
                 background: <?= $color ?>;
                 box-shadow: 0 0 10px <?= $color . '33' ?>;
               "><?= $resultado ?></span>
@@ -164,7 +201,10 @@ $diff_goles = $gf - $gc;
 
     </div>
 
-    <div class="reveal" style="overflow-x:auto;">
+    <div class="reveal" style="overflow-x:auto; margin-bottom: 4rem;">
+      <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--terminal); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+        > Clasificación General
+      </div>
       <table class="tabla">
         <thead>
           <tr>
@@ -190,6 +230,49 @@ $diff_goles = $gf - $gc;
         </tbody>
       </table>
     </div>
+
+    <div class="reveal" style="overflow-x:auto;">
+      <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--terminal); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+        > Tabla de Goleadores Piemonte
+      </div>
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th style="width: 70px;">Dorsal</th>
+            <th>Jugador</th>
+            <th>Posición</th>
+            <th class="num" style="color: var(--terminal); width: 100px;">Goles</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php if (empty($goleadores_ranking)): ?>
+            <tr>
+              <td colspan="4" style="color: var(--muted); text-align: center;">No hay jugadores registrados en la plantilla.</td>
+            </tr>
+          <?php else: ?>
+            <?php foreach ($goleadores_ranking as $index => $jugador): 
+              $es_pichichi = ($index === 0 && $jugador['goles_totales'] > 0);
+            ?>
+              <tr class="<?= $es_pichichi ? 'pichichi' : '' ?>">
+                <td style="font-family: var(--font-mono); color: <?= $es_pichichi ? '#000' : 'var(--muted)' ?>;">
+                  #<?= htmlspecialchars($jugador['dorsal']) ?>
+                </td>
+                <td style="font-weight: <?= $es_pichichi ? 'bold' : 'normal' ?>;">
+                  <?= htmlspecialchars($jugador['nombre']) ?> <?= $es_pichichi ? '👑' : '' ?>
+                </td>
+                <td style="font-size: 0.9rem; color: <?= $es_pichichi ? '#000' : 'var(--muted)' ?>;">
+                  <?= htmlspecialchars($jugador['posicion']) ?>
+                </td>
+                <td class="num" style="font-family: var(--font-mono); font-weight: bold; font-size: 1.1rem; color: <?= $es_pichichi ? '#000' : 'var(--terminal)' ?>;">
+                  <?= $jugador['goles_totales'] ?>
+                </td>
+              </tr>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </section>
 

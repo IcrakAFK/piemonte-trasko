@@ -46,9 +46,10 @@
     </div>
   </div>
   <div class="container footer-bottom">
-    <p>&copy; <?= date('Y') ?> <strong>CD Piemonte Trasco</strong> · Hecho en la ESEI</p>
+    <p>© <?= date('Y') ?> <strong>CD Piemonte Trasco</strong> · Hecho en la ESEI</p>
   </div>
 </footer>
-<script src="assets/js/main.js"></script>
+
+<script src="assets/js/main.js?v=1.0.1"></script>
 </body>
 </html>

@@ -10,7 +10,7 @@
     </div>
 
     <h1>CD Piemonte <span class="accent">Trasco</span></h1>
-    <p class="hero-lema">// "Un trasco no meu peito"</p>
+    <p class="hero-lema">"Un trasco no meu peito"</p>
     <div class="hero-cta">
       <a href="plantilla.php" class="btn btn-primary">Conoce la plantilla →</a>
       <a href="https://instagram.com/piemonte_trasko" target="_blank" rel="noopener" class="btn btn-ghost">@piemonte_trasko</a>
@@ -21,7 +21,7 @@
 <section class="block">
   <div class="container">
     <div class="section-head reveal">
-      <span class="section-tag">// quiénes somos</span>
+      <span class="section-tag"></span>
       <h2>Del aula al césped</h2>
       <p>Somos un equipo de fútbol aficionado nacido en los pasillos de la <strong>ESEI</strong>, el Campus de Ourense de la <strong>Universidad de Vigo</strong>. Compilamos jugadas, debuggeamos al rival y desplegamos victorias cada fin de semana.</p>
     </div>
@@ -63,7 +63,7 @@
 <section class="block">
   <div class="container split">
     <div class="prose reveal">
-      <span class="section-tag">// próximos partido</span>
+      <span class="section-tag"></span>
       <h2 style="font-family:var(--font-display);font-size:2.5rem;letter-spacing:1px;color:var(--chalk);margin:.5rem 0 1.5rem;">Nos vemos en el campo</h2>
       <p class="lead">Consulta el calendario completo, la clasificación y los próximos rivales del Piemonte Trasco.</p>
       <p>Cada jornada es una nueva commit. Cada gol, un push directo a master.</p>

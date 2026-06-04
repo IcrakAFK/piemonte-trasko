@@ -3,7 +3,7 @@
 <section class="block">
   <div class="container">
     <div class="section-head reveal">
-      <span class="section-tag">// el club</span>
+      <span class="section-tag"></span>
       <h2>Nuestra historia</h2>
       <p>Donde el balón se cruza con el código fuente.</p>
     </div>
@@ -15,18 +15,6 @@
         <p>Nuestro club mezcla dos mundos que parecen opuestos pero comparten lo esencial: <strong>disciplina, equipo y pasión por mejorar cada día</strong>. Un commit más, un sprint más, un gol más.</p>
         <p>Hoy somos una pequeña gran familia. Compañeros de carrera, exalumnos, profes que se apuntan y amigos que se unen al proyecto. Y lo mejor: esto solo acaba de empezar.</p>
       </div>
-
-      <div class="reveal">
-        <div class="code-block">
-<span class="com">// historia.js</span><br>
-<span class="kw">const</span> piemonte = {<br>
-&nbsp;&nbsp;origen: <span class="str">'ESEI - Campus Ourense'</span>,<br>
-&nbsp;&nbsp;universidad: <span class="str">'UVigo'</span>,<br>
-&nbsp;&nbsp;lema: <span class="str">'Un trasco no meu peito'</span>,<br>
-&nbsp;&nbsp;valores: [<span class="str">'pasión'</span>, <span class="str">'equipo'</span>, <span class="str">'código'</span>],<br>
-&nbsp;&nbsp;run() { <span class="kw">return</span> <span class="str">'⚽ + 💻 = ❤️'</span>; }<br>
-};
-        </div>
 
         <div class="grid grid-3" style="margin-top:2rem;">
           <div class="card">
@@ -48,7 +36,7 @@
 <section class="block" style="background:var(--carbon);">
   <div class="container">
     <div class="section-head reveal">
-      <span class="section-tag">// nuestros valores</span>
+      <span class="section-tag"></span>
       <h2>Lo que nos mueve</h2>
     </div>
     <div class="grid grid-3">

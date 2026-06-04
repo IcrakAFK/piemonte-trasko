@@ -28,3 +28,19 @@ if (kicker) {
   };
   setTimeout(tick, 300);
 }
+
+// Manejador interactivo para desplegar los goles en el calendario
+document.addEventListener('click', function (e) {
+  // Buscamos si el clic se ha hecho dentro de un elemento .match que tenga la clase .clickable
+  const matchHeader = e.target.closest('.match.clickable');
+  
+  if (matchHeader) {
+    const container = matchHeader.parentElement;
+    const dropdown = container.querySelector('.match-details-dropdown');
+    
+    if (dropdown) {
+      matchHeader.classList.toggle('dropdown-open');
+      dropdown.classList.toggle('open');
+    }
+  }
+});
